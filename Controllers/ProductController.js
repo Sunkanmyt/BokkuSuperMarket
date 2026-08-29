@@ -86,7 +86,7 @@ exports.updateProduct = async (req, res) => {
       color,
     });
     if (!product) {
-      res.status(404).json({ message: "Product not found" });
+      return res.status(404).json({ message: "Product not found" });
     }
     res
       .status(201)
