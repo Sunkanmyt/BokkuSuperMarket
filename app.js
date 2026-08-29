@@ -1,18 +1,20 @@
+// Importing all required modules and dependencies
+const dotenv = require("dotenv");
+const productRoutes = require("./Routes/ProductRoute");
+const connectToDB = require("./Config/databaseConfig");
 const express = require("express");
 const app = express();
-require("dotenv").config();
+
+app.use(express.json()); // Setting up the middleware
+app.use("/products", productRoutes);
+
+// Using dotenv to load environment variables from a .env file into process.env
+dotenv.config();
+
+// Connecting to the database
+connectToDB();
 
 const port = process.env.PORT || 3000;
-app.use(express.json());
-
 app.listen(port, () => {
   console.log(`server is running on PORT ${port}`);
-});
-
-app.get("/products", (req, res) => {
-  res.json([
-    {
-      name: "MacBook Pro M5 Pro",
-    },
-  ]);
 });
