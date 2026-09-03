@@ -103,7 +103,7 @@ exports.loginUser = async (req, res) => {
     // Checking if the user exists
     const user = await User.findOne({ email: email });
     if (!user) {
-      return res.status(404).json({ message: "User not found" });
+      return res.status(404).json({ message: "Invalid Email or Password" });
     }
 
     // Check if password matches
@@ -115,12 +115,20 @@ exports.loginUser = async (req, res) => {
     // Generate a token for the user
     const jwt = require("jsonwebtoken");
     const token = jwt.sign(
-      { id: user._id, name: user.name, email: user.email },
+      {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        hasAdminAccess: user.hasAdminAccess,
+      },
       process.env.JWT_SECRET,
       { expiresIn: process.env.JWT_EXPIRES_IN },
     );
 
-    res.status(200).json({ message: "Login successful!", token });
+    res
+      .status(200)
+      .json({ message: "Login successful!", token, role: user.role });
   } catch (error) {
     res.status(500).json({ message: "Unable to Login", error: error.message });
   }
