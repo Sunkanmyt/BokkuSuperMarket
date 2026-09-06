@@ -7,6 +7,9 @@ const { authenticate } = require("../Middleware/auth");
 // Import middleware to authorize users
 const { authorize } = require("../Middleware/role");
 
+// Importing image upload middleware
+const upload = require("../Middleware/upload");
+
 // Importing product related controllers
 const productController = require("../Controllers/ProductController");
 
@@ -31,11 +34,18 @@ router.post(
   "/createproduct",
   authenticate,
   authorize("superadmin"),
+  upload.single("image"),
   productController.createProduct,
 );
 
 // To update products
-router.put("/updateproduct/:id", authenticate, productController.updateProduct);
+router.put(
+  "/updateproduct/:id",
+  authenticate,
+  authorize("superadmin"),
+  upload.single("image"),
+  productController.updateProduct,
+);
 
 // To delete a product
 router.delete(

@@ -1,4 +1,5 @@
 const Product = require("../Models/Products");
+const sendEmail = require("../Utility/mail");
 
 // Get all products
 exports.getProducts = async (req, res) => {
@@ -53,6 +54,10 @@ exports.createProduct = async (req, res) => {
 
     const { name, description, size, quantity, price, color } = req.body;
 
+    if (!req.file) {
+      return res.status(400).json({ message: "Product image is required." });
+    }
+
     const newProduct = new Product({
       name,
       description,
@@ -60,9 +65,17 @@ exports.createProduct = async (req, res) => {
       quantity,
       price,
       color,
+      imageUrl: req.file.path,
+      imagePublicId: req.file.filename,
     });
 
     const savedProduct = await newProduct.save();
+
+    // Send an email notification when a new product is created
+    const emailSubject = "New Product Created";
+    const emailText = `A new product has been created:\n\nName: ${name}\nDescription: ${description}\nSize: ${size}\nQuantity: ${quantity}\nPrice: ${price}\nColor: ${color}`;
+    await sendEmail(req.user.email, emailSubject, emailText);
+
     res
       .status(201)
       .json({ message: "Product successfully created", savedProduct });
@@ -77,17 +90,31 @@ exports.updateProduct = async (req, res) => {
     const id = req.params.id;
     const { name, description, size, quantity, price, color } = req.body;
 
-    const product = await Product.findByIdAndUpdate(id, {
-      name,
-      description,
-      size,
-      quantity,
-      price,
-      color,
-    });
+    const product = await Product.findByIdAndUpdate(
+      id,
+      {
+        name,
+        description,
+        size,
+        quantity,
+        price,
+        color,
+      },
+      {
+        new: true,
+        runValidators: true,
+      },
+    );
+
     if (!product) {
       return res.status(404).json({ message: "Product not found" });
     }
+
+    // Send an email notification when a new product is created
+    const emailSubject = "New Product Updated";
+    const emailText = `The product "${name}" has been updated:\n\nName: ${name}\nDescription: ${description}\nSize: ${size}\nQuantity: ${quantity}\nPrice: ${price}\nColor: ${color}`;
+    await sendEmail(req.user.email, emailSubject, emailText);
+
     res
       .status(201)
       .json({ message: "Product was successfully updated", product });

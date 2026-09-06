@@ -1,20 +1,21 @@
 const express = require("express");
 const app = express();
 
-// Importing all required modules and dependencies
+// Using dotenv to load environment variables from a .env file into process.env
 const dotenv = require("dotenv");
+dotenv.config();
+
+// Importing all required modules and dependencies
 const connectToDB = require("./Config/databaseConfig");
 
 const productRoutes = require("./Routes/ProductRoute");
 const userRoutes = require("./Routes/UserRoute");
 
-app.use(express.json()); // Setting up the middleware
+// Setting up the middleware
+app.use(express.json());
 
 app.use("/products", productRoutes);
 app.use("/users", userRoutes);
-
-// Using dotenv to load environment variables from a .env file into process.env
-dotenv.config();
 
 // Connecting to the database
 connectToDB();
